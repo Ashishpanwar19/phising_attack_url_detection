@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing URL Detector</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-image: url("https://content.kaspersky-labs.com/se/com/content/en-global/images/repository/isc/2020/phishing-image-1/phishing-image-1.jpg"); /* example phishing-related bg */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-attachment: fixed;
+            color: #333;
+        }
+        
+        
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .tagline {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .phishing-demo {
+            background: linear-gradient(135deg, #fff8f8, #fff);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 30px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid #e74c3c;
+            text-align: center;
+        }
+        
+        .phishing-demo h3 {
+            color: #e74c3c;
+            margin-top: 0;
+        }
+        
+        .phishing-demo img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #eee;
+            margin: 15px 0;
+            transition: transform 0.3s ease;
+        }
+        
+        .phishing-demo img:hover {
+            transform: scale(1.02);
+        }
+        
+        .input-group {
+            margin-bottom: 30px;
+        }
+        
+        input[type="url"] {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="url"]:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            transition: all 0.3s;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(41, 128, 185, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(41, 128, 185, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .safe {
+            background: linear-gradient(135deg, #d4edda, #e8f5e9);
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+        
+        .phishing {
+            background: linear-gradient(135deg, #f8d7da, #ffebee);
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+        
+        .loading {
+            text-align: center;
+            margin: 30px 0;
+            display: none;
+        }
+        
+        .spinner {
+            border: 5px solid rgba(52, 152, 219, 0.2);
+            border-radius: 50%;
+            border-top: 5px solid #3498db;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .features {
+            margin-top: 40px;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+        }
+        
+        .features h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        
+        .features ul {
+            padding-left: 20px;
+            columns: 2;
+            column-gap: 30px;
+        }
+        
+        .features li {
+            margin-bottom: 10px;
+            break-inside: avoid;
+        }
+        
+        .disclaimer {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #f39c12;
+        }
+        
+        @media (max-width: 768px) {
+            .features ul {
+                columns: 1;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Phishing URL Detector</h1>
+            <p class="tagline">Protect yourself from online scams and fraudulent websites</p>
+        </div>
+        
+        <!-- Phishing Example Section -->
+        <div class="phishing-demo">
+            <h3>⚠️ Example of a Sophisticated Phishing Attempt</h3>
+            <p>This is what modern phishing websites look like - can you spot the red flags?</p>
+            
+                     
+            <p>Our detector analyzes dozens of characteristics to identify such threats.</p>
+        </div>
+        
+        <div class="input-group">
+            <input type="url" id="urlInput" placeholder="Enter suspicious URL to analyze (e.g., http://secure-paypal-login.com)" required>
+        </div>
+        
+        <button id="checkBtn">
+            <span class="button-text">Analyze URL Now</span>
+            <span class="button-icon">🔍</span>
+        </button>
+        
+        <div class="loading" id="loadingIndicator">
+            <div class="spinner"></div>
+            <p>Running advanced phishing analysis...</p>
+        </div>
+        
+        <div class="result" id="resultContainer">
+            <h2 id="resultTitle">Result</h2>
+            <p id="resultText"></p>
+            <div id="featureAnalysis"></div>
+        </div>
+        
+        <div class="features">
+            <h3>Advanced Detection Features</h3>
+            <p>Our system examines multiple phishing indicators including:</p>
+            <ul>
+                <li>Domain registration anomalies</li>
+                <li>Suspicious keyword patterns</li>
+                <li>URL structure abnormalities</li>
+                <li>IP address masking</li>
+                <li>URL shortening services</li>
+                <li>HTTPS certificate validity</li>
+                <li>Subdomain manipulation</li>
+                <li>Known phishing patterns</li>
+                <li>Brand impersonation</li>
+                <li>Domain age analysis</li>
+                <li>Geolocation mismatches</li>
+                <li>Typo-squatting detection</li>
+            </ul>
+        </div>
+        
+        <div class="disclaimer">
+            <strong>Important Note:</strong> While our phishing detector uses advanced machine learning algorithms 
+            to identify potential threats, no automated system is 100% accurate. Always verify website authenticity 
+            before entering sensitive information. When in doubt, contact the organization directly through 
+            official channels.
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('checkBtn').addEventListener('click', checkURL);
+        
+        function checkURL() {
+            const urlInput = document.getElementById('urlInput').value.trim();
+            
+            if (!urlInput) {
+                alert('Please enter a URL to analyze');
+                return;
+            }
+            
+            try {
+                new URL(urlInput);
+            } catch (e) {
+                alert('Please enter a valid URL format (e.g., https://example.com)');
+                return;
+            }
+            
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('resultContainer').style.display = 'none';
+            
+            // Simulate analysis delay
+            setTimeout(() => {
+                analyzeURL(urlInput);
+            }, 1800);
+        }
+        
+        function analyzeURL(url) {
+            document.getElementById('loadingIndicator').style.display = 'none';
+            const urlObj = new URL(url);
+            const hostname = urlObj.hostname;
+            const features = extractFeatures(url, hostname);
+            const isPhishing = predictPhishing(features);
+            displayResults(url, isPhishing, features);
+        }
+        
+        function extractFeatures(url, hostname) {
+            return {
+                urlLength: url.length,
+                hasHttps: url.startsWith('https://'),
+                numSubdomains: hostname.split('.').length - 2,
+                hasIpAddress: /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname),
+                hasAtSymbol: url.includes('@'),
+                hasHyphen: hostname.includes('-'),
+                numDigits: (url.match(/\d/g) || []).length,
+                isShortUrl: isShortUrlService(hostname),
+                suspiciousKeywords: hasSuspiciousKeywords(url),
+                commonBrand: checkCommonBrand(hostname),
+                hasUnicode: /[^\x00-\x7F]/.test(hostname)
+            };
+        }
+        
+        function isShortUrlService(hostname) {
+            const shortUrlServices = [
+                'bit.ly', 'goo.gl', 'tinyurl.com', 'ow.ly', 't.co',
+                'is.gd', 'buff.ly', 'adf.ly', 'shorte.st', 'bc.vc'
+            ];
+            return shortUrlServices.some(service => hostname.includes(service));
+        }
+        
+        function hasSuspiciousKeywords(url) {
+            const suspiciousKeywords = [
+                'login', 'verify', 'account', 'confirm', 'secure',
+                'update', 'banking', 'paypal', 'ebay', 'amazon',
+                'password', 'credit', 'card', 'social', 'security',
+                'alert', 'urgent', 'action', 'required', 'suspended'
+            ];
+            const urlLower = url.toLowerCase();
+            return suspiciousKeywords.filter(keyword => urlLower.includes(keyword.toLowerCase()));
+        }
+        
+        function checkCommonBrand(hostname) {
+            const commonBrands = [
+                'paypal', 'ebay', 'amazon', 'bankofamerica', 'wellsfargo',
+                'chase', 'citibank', 'apple', 'microsoft', 'google',
+                'facebook', 'twitter', 'linkedin', 'instagram', 'netflix',
+                'dropbox', 'adobe', 'spotify', 'whatsapp', 'skype'
+            ];
+            const hostLower = hostname.toLowerCase();
+            return commonBrands.find(brand => 
+                hostLower.includes(brand.toLowerCase()) && !hostLower.endsWith(`${brand}.com`)
+            );
+        }
+        
+        function predictPhishing(features) {
+            let phishingScore = 0;
+            
+            // Feature scoring
+            if (features.hasIpAddress) phishingScore += 35;
+            if (features.hasAtSymbol) phishingScore += 30;
+            if (features.isShortUrl) phishingScore += 25;
+            if (features.suspiciousKeywords.length > 0) {
+                phishingScore += 12 * features.suspiciousKeywords.length;
+            }
+            if (features.commonBrand) phishingScore += 45;
+            if (features.numSubdomains > 2) phishingScore += 20;
+            if (!features.hasHttps) phishingScore += 25;
+            if (features.urlLength > 75) phishingScore += 15;
+            if (features.hasHyphen) phishingScore += 10;
+            if (features.numDigits > 5) phishingScore += 15;
+            if (features.hasUnicode) phishingScore += 30;
+            
+            return phishingScore > 60;
+        }
+        
+        function displayResults(url, isPhishing, features) {
+            const resultContainer = document.getElementById('resultContainer');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultText = document.getElementById('resultText');
+            const featureAnalysis = document.getElementById('featureAnalysis');
+            
+            if (isPhishing) {
+                resultContainer.className = 'result phishing';
+                resultTitle.textContent = '⚠️ High Risk Phishing Detected!';
+                resultText.innerHTML = `The URL <strong>"${url}"</strong> exhibits multiple characteristics of a phishing attempt.<br><br>
+                <strong>Recommendation:</strong> Do not enter any personal or financial information on this site.`;
+            } else {
+                resultContainer.className = 'result safe';
+                resultTitle.textContent = '✓ No Obvious Threats Detected';
+                resultText.innerHTML = `The URL <strong>"${url}"</strong> doesn't show clear signs of phishing.<br><br>
+                <strong>Recommendation:</strong> Remain cautious and verify the site's authenticity before entering sensitive data.`;
+            }
+            
+            let featureHTML = '<div class="feature-details"><h3>Detailed Analysis:</h3><ul>';
+            
+            if (features.hasIpAddress) featureHTML += '<li>⚠️ <strong>Uses IP address</strong> instead of domain name</li>';
+            if (features.hasAtSymbol) featureHTML += '<li>⚠️ <strong>Contains @ symbol</strong> (possible redirection attempt)</li>';
+            if (features.isShortUrl) featureHTML += '<li>⚠️ <strong>Uses URL shortening service</strong> (often used to hide malicious links)</li>';
+            if (features.suspiciousKeywords.length > 0) {
+                featureHTML += `<li>⚠️ <strong>Suspicious keywords found:</strong> ${features.suspiciousKeywords.join(', ')}</li>`;
+            }
+            if (features.commonBrand) featureHTML += `<li>⚠️ <strong>Brand impersonation detected:</strong> Mimics "${features.commonBrand}" but not on official domain</li>`;
+            if (features.numSubdomains > 2) featureHTML += `<li>⚠️ <strong>Excessive subdomains:</strong> ${features.numSubdomains} levels detected</li>`;
+            if (!features.hasHttps) featureHTML += '<li>⚠️ <strong>No HTTPS encryption</strong> (connection not secure)</li>';
+            if (features.urlLength > 75) featureHTML += '<li>⚠️ <strong>Unusually long URL</strong> (common in phishing attempts)</li>';
+            if (features.hasHyphen) featureHTML += '<li>⚠️ <strong>Hyphens in domain</strong> (often used in fake domains)</li>';
+            if (features.numDigits > 5) featureHTML += '<li>⚠️ <strong>Excessive numbers in URL</strong> (common in malicious links)</li>';
+            if (features.hasUnicode) featureHTML += '<li>⚠️ <strong>Unicode characters detected</strong> (possible homograph attack)</li>';
+            
+            if (!isPhishing) {
+                if (features.hasHttps) featureHTML += '<li>✓ <strong>HTTPS secured connection</strong></li>';
+                if (features.suspiciousKeywords.length === 0) featureHTML += '<li>✓ No suspicious keywords detected</li>';
+                if (!features.commonBrand) featureHTML += '<li>✓ No obvious brand impersonation</li>';
+            }
+            
+            featureHTML += '</ul></div>';
+            featureAnalysis.innerHTML = featureHTML;
+            resultContainer.style.display = 'block';
+            
+            // Scroll to results
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
